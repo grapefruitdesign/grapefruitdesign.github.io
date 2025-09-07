@@ -3,57 +3,210 @@
  
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible"
-          content="IE=edge">
-    <meta name="viewport" content=
-        "width=device-width, initial-scale=1.0">
-    <title>Changing Theme</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNIT 133A — Homework 1</title>
  
     <style>
+        body {
+            margin: 0 auto 20px auto;
+            width: 100%;
+            max-width: 960px;
+        }
+        p, h1, h2, label {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        p {
+            font-size: 0.9rem;
+        }
         h1 {
             text-align: center;
         }
-        footer {
-            text-align: center;
-            margin-top: 1.2rem;
-        }
         button {
             color: black;
-            background-color: darkgray;
+            background-color: lightgray;
             width: auto;
             margin: 0 10px;
-            height: 30px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid currentColor;
+        }
+        .button-section {
+            margin: 0 auto;
+            text-align: center;
         }
         section {
-            font-size: 1.2rem;
+            padding: 20px;
+            margin: 40px;
+            background-color: rgba(0,0,0,0.05);
+            border-radius: 8px;
         }
         section h2 {
             text-align: center;
             font-size: 1.6rem;
-            font-style: italic;
         }
         figure {
             text-align: center;
             margin: 0 auto;
         }
+        .light-theme {
+            background-color: white;
+            color: black;
+        }
+        .dark-theme {
+            background-color: black;
+            color: white;
+        }
+        #theme-image {
+            margin: 40px;
+            border: 1px solid currentColor;
+            border-radius: 8px;
+            width: 300px;
+            height: auto;
+        }
+        pre {
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid currentColor;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9rem;
+            display: inline-block;
+            white-space: pre;
+            margin: 1rem auto;
+            text-align: left;
+            white-space-collapse: preserve;
+            text-wrap: nowrap;
+        }
+        code {
+            white-space-collapse: preserve;
+            text-wrap: nowrap;
+            font-family: "Courier New", Courier, monospace;
+        }
     </style>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
  
 <body>
         <header>
-            <h1>Changing Themes</h1>
+            <h1>CNIT 133A – Homework 1</h1>
         </header>
         <section>
-            <h2>Using jQuery</h2>
-            <p>We will create a jQuery code so if the user clicks on Light Theme button, you will apply the appropriate class to make the whole page lighter. The image below will also be changed to show the image of the sun! If the Dark Theme button is clicked, the image of the moon will be displayed and the appropriate class will be applied to the whole page as well</p>
+            <h2>I. Changing Themes Using jQuery</h2>
+            <div class="button-section">
+                <button id="light">Light Theme</button>
+                <button id="dark">Dark Theme</button>
+            </div>
             <figure>
-                <img src="images/sun.jpeg" alt="cartoon sun" width="300" height="280">
+                <img id="theme-image" src="images/sun.jpeg" alt="sun illustration">
             </figure>
+        </section>  
+        <section>
+            <h2>II. HTMX Question</h2>
+            <p><strong>Question:</strong><br>Is it possible to have multiple trigger types in HTMX? For example, suppose that I want to trigger the request when a select element (see the element below) changes or load and then display the response in an area of my page with <code>id="result"</code>. So, if I have the following select element, how would I use/code the htmx attributes for this scenario? Notice that the POST request is already coded.</p>
+            <p><strong>Answer:</strong><br>Yes. HTMX allows multiple trigger types, and this is done using the <code>hx-trigger</code> attribute with a comma-separated list of events.</p>
+            <p>Here's how you could send a POST request both when the page loads and when the user changes the selection:</p>
+            <pre><code>&lt;select 
+  name="city"
+  id="city" 
+  hx-post="/api/search"
+  hx-target="#result"
+  hx-trigger="load, change"&gt;
+    &lt;option&gt;San Francisco&lt;/option&gt;
+    &lt;option&gt;New York&lt;/option&gt;
+    &lt;option&gt;Las Vegas&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;!-- Area where the server response will be displayed --&gt;
+&lt;div id="result"&gt;&lt;/div&gt;</code></pre>
+            <p><strong>Explanation:</strong><br>
+                <code>hx-post="/api/search"</code><br>
+                This sends an HTTP POST request to the <code>/api/search</code> endpoint on your server.</p>
+                <ul>
+                    <li>
+                        This endpoint is where you handle the request, read the selected city from the form data, and return an appropriate response (usually HTML that HTMX will inject into the page).</li>
+                    <li>For example, your server might look up hotels or weather data for the selected city and send back an HTML snippet.</li>
+                </ul>
+                    <p><code>hx-target="#result"</code><br>
+                This tells HTMX where to place the server’s response — in this case, it will replace the contents of the element with <code>id="result"</code>.</p>
+                <p>
+                    <code>hx-trigger="load, change"</code><br>
+                    This specifies two trigger events:
+                    <ul>
+                        <li><code>load</code> → fires once when the page finishes loading, sending an initial POST request using the default selected option.</li>
+                        <li><code>change</code> → fires whenever the user selects a different option.</li>
+                    </ul>
         </section>
-        <footer>
-            <button id="light">Light Theme</button>
-            <button id="dark">Dark Theme</button>
-        </footer>
+        <section>
+            <h2>III. HTMX Demo</h2>
+            <label for="cityDemo">Choose a city:</label>
+      <select id="cityDemo">
+        <option value="">Pick a City</option>
+        <option>San Francisco</option>
+        <option>New York</option>
+        <option>Las Vegas</option>
+      </select>
+
+      <div id="resultDemo" aria-live="polite" style="min-height:100px; margin-top:0.5rem; border:1px solid currentColor; padding:0.5rem; border-radius:8px;">
+        <p>Learn more about you're favorite city</p>
+      </div>
+
+        </section> 
+        <script>
+            // Theme Changer
+            $(document).ready(function() {
+              $("#light").on("click", function() {
+                $("body")
+                  .removeClass("dark-theme")
+                  .addClass("light-theme");
+                $("#theme-image")
+                  .attr("src", "images/sun.jpeg")
+                  .attr("alt", "Sun Illustration");
+              });
+        
+              $("#dark").on("click", function() {
+                $("body")
+                  .removeClass("light-theme")
+                  .addClass("dark-theme");
+                $("#theme-image")
+                  .attr("src", "images/moon.jpeg")
+                  .attr("alt", "Moon Illustration");
+              });
+            });
+
+            // HTMX Demo
+            $("#cityDemo").on("change", function() {
+                const city = $(this).val();
+                let content = "<p>Learn more about you're favorite city</p>";
+
+                switch(city) {
+                case "San Francisco":
+                    content = `
+                    <div class="city-info">
+                        <img src="images/san-francisco.jpg" alt="San Francisco" style="width:300px; border-radius:8px;">
+                        <p>San Francisco, California<br>
+                            Population: 827,526</p>
+                    </div>`;
+                    break;
+                case "New York":
+                    content = `
+                    <div class="city-info">
+                        <img src="images/new-york.jpg" alt="New York City" style="width:300px; border-radius:8px;">
+                        <p>New York - Statue of Liberty & Times Square</p>
+                    </div>`;
+                    break;
+                case "Las Vegas":
+                    content = `
+                    <div class="city-info">
+                        <img src="images/las-vegas.jpg" alt="Las Vegas Strip" style="width:300px; border-radius:8px;">
+                        <p>Las Vegas - Famous Strip & Casinos</p>
+                    </div>`;
+                    break;
+                }
+
+                $("#resultDemo").hide().html(content).fadeIn(500);
+            });
+        </script>
 </body>
  
 </html>
