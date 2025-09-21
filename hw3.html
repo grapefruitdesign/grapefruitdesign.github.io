@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>D3 Bar Chart (data.json)</title>
+    <style>
+      body {
+        background: #1a1a1a;
+        color: #eaeaea;
+        font-family: sans-serif;
+        padding: 16px;
+        margin: 0 auto;
+        width: 100%;
+      }
+      #chart rect {
+        fill: #4aaeea;
+      }
+      #chart text {
+        fill: white;
+        font: 10px sans-serif;
+        text-anchor: middle;
+      }
+      .axis text {
+        font: 10px sans-serif;
+      }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: #fff;
+        shape-rendering: crispEdges;
+      }
+      .tooltip {
+        position: absolute;
+        background: #333;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 4px;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Student Enrollment per Term</h2>
+    <div id="chart"></div>
+    <div class="tooltip" id="tooltip"></div>
+    <!-- Tooltip Container -->
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+      // Main
+      d3.json("hw3data.json")
+        .then(function (data) {
+          var width = 700,
+            height = 420;
+          var margin = { top: 20, right: 20, bottom: 60, left: 60 };
+
+          var svg = d3
+            .select("#chart")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+          var x = d3
+            .scaleBand()
+            .domain(data.map((d) => d.term))
+            .range([margin.left, width - margin.right])
+            .padding(0.2);
+
+          var y = d3
+            .scaleLinear()
+            .domain([0, d3.max(data, (d) => d.students)])
+            .nice()
+            .range([height - margin.bottom, margin.top]);
+
+          // X-Axis
+          svg
+            .append("g")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .call(d3.axisBottom(x))
+            .selectAll("text")
+            .attr("transform", "rotate(-25)")
+            .style("text-anchor", "end");
+
+          // Y-Axis
+          svg
+            .append("g")
+            .attr("transform", `translate(${margin.left},0)`)
+            .call(d3.axisLeft(y));
+
+          // Tooltip Element
+          var tooltip = d3.select("#tooltip");
+
+          svg
+            .selectAll("rect")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("x", (d) => x(d.term))
+            .attr("y", (d) => y(d.students))
+            .attr("width", x.bandwidth())
+            .attr("height", (d) => height - margin.bottom - y(d.students))
+            .on("mouseover", function (event, d) {
+              // Show tooltip above the bar
+              tooltip
+                .style("opacity", 1)
+                .html(`<strong>${d.term}</strong><br/>Students: ${d.students}`);
+
+              // Bar Position
+              const barX = x(d.term) + x.bandwidth() / 2;
+              const barY = y(d.students);
+
+              // Convert from SVG coords to screen coords
+              const matrix = this.getScreenCTM();
+              const point = svg.node().createSVGPoint();
+              point.x = barX;
+              point.y = barY;
+              const screenPoint = point.matrixTransform(matrix);
+
+              tooltip
+                .style(
+                  "left",
+                  screenPoint.x - tooltip.node().offsetWidth / 2 + "px"
+                )
+                .style("top", screenPoint.y - 35 + "px");
+
+              d3.select(this).attr("fill", "#2b8cd3"); // Highlight bar
+            })
+            .on("mouseout", function () {
+              tooltip.style("opacity", 0);
+              d3.select(this).attr("fill", "#4aaeea"); // Reset bar color
+            });
+
+          // Labels
+          svg
+            .selectAll("text.label")
+            .data(data)
+            .enter()
+            .append("text")
+            .attr("class", "label")
+            .attr("x", (d) => x(d.term) + x.bandwidth() / 2)
+            .attr("y", (d) => y(d.students) - 6)
+            .text((d) => d.students);
+        })
+        .catch(function (err) {
+          console.error("Failed to load data.json:", err);
+        });
+    </script>
+  </body>
+</html>
